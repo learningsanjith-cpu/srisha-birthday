@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Srisha: 19 — A Netflix Original</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --red: #E50914;
+      --dark: #0a0a0a;
+      --mid: #141414;
+      --gold: #F5C518;
+      --gray: #808080;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--dark);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ═══════════ SPLASH SCREEN ═══════════ */
+    #splash-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: opacity 0.8s ease;
+    }
+    #splash-screen.hide { opacity: 0; pointer-events: none; }
+    #splash-n {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(100px, 25vw, 220px);
+      color: var(--red);
+      line-height: 1;
+      animation: splashPulse 2s ease-in-out infinite;
+    }
+    @keyframes splashPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.75; transform: scale(0.97); }
+    }
+    #splash-text {
+      font-size: 11px;
+      letter-spacing: 6px;
+      color: #555;
+      margin-top: 20px;
+      text-transform: uppercase;
+      animation: splashPulse 2s ease-in-out infinite;
+    }
+
+    /* ═══════════ VIDEO OVERLAY ═══════════ */
+    #video-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 1.5s ease;
+    }
+    #video-overlay.fade-out { opacity: 0; pointer-events: none; }
+    #netflix-video { width: 100%; height: 100%; object-fit: contain; }
+    #skip-btn {
+      position: absolute;
+      bottom: 40px;
+      right: 40px;
+      background: rgba(20,20,20,0.85);
+      border: 1.5px solid rgba(255,255,255,0.5);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      letter-spacing: 2px;
+      padding: 12px 28px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    #skip-btn:hover { background: rgba(229,9,20,0.7); border-color: var(--red); }
+
+    /* ═══════════ TITLE CARD ═══════════ */
+    #title-card {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      text-align: center;
+      padding: 60px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    #title-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, rgba(229,9,20,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .original-badge {
+      font-size: 11px;
+      letter-spacing: 7px;
+      color: var(--gray);
+      margin-bottom: 24px;
+      animation: fadeUp 1s 0.3s ease both;
+    }
+    .big-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(72px, 18vw, 200px);
+      color: var(--red);
+      letter-spacing: -2px;
+      line-height: 0.9;
+      animation: titleReveal 1.4s 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+      text-shadow: 0 0 80px rgba(229,9,20,0.3);
+    }
+    .title-nineteen {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(20px, 5vw, 52px);
+      letter-spacing: 18px;
+      color: #fff;
+      margin-top: 8px;
+      animation: fadeUp 1s 1.2s ease both;
+    }
+    .title-tagline {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: clamp(14px, 2.5vw, 22px);
+      color: #aaa;
+      margin-top: 20px;
+      animation: fadeUp 1s 1.5s ease both;
+    }
+    .meta-pills {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 28px;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeUp 1s 1.8s ease both;
+    }
+    .meta-pill {
+      font-size: 11px;
+      letter-spacing: 2px;
+      border: 1px solid #444;
+      padding: 4px 14px;
+      color: #bbb;
+    }
+    .meta-pill.red { border-color: var(--red); color: var(--red); }
+    .scroll-cue {
+      margin-top: 60px;
+      animation: fadeUp 1s 2.2s ease both, nudge 2.5s 3s ease-in-out infinite;
+      font-size: 11px;
+      letter-spacing: 4px;
+      color: #555;
+    }
+    @keyframes titleReveal {
+      from { opacity: 0; transform: scale(0.75) translateY(20px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes nudge {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(10px); }
+    }
+
+    /* ═══════════ LETTER SECTION ═══════════ */
+    #letter-section {
+      background: #0d0d0d;
+      padding: 0 0 100px;
+    }
+    .episode-banner {
+      background: var(--mid);
+      border-bottom: 1px solid #222;
+      padding: 60px 24px 50px;
+      text-align: center;
+    }
+    .ep-label {
+      font-size: 10px;
+      letter-spacing: 6px;
+      color: var(--red);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .ep-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(36px, 7vw, 72px);
+      letter-spacing: 4px;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+    .ep-meta {
+      font-size: 12px;
+      color: var(--gray);
+      letter-spacing: 1px;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 3px;
+      background: #333;
+      position: relative;
+      margin-top: 30px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--red);
+      animation: fillProgress 3s ease forwards;
+    }
+    @keyframes fillProgress {
+      from { width: 0%; }
+      to   { width: 100%; }
+    }
+    .letter-wrap {
+      max-width: 760px;
+      margin: 70px auto 0;
+      padding: 0 28px;
+    }
+    .letter-wrap p {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(16px, 2.2vw, 20px);
+      line-height: 1.95;
+      color: #ddd;
+      margin-bottom: 1.6em;
+    }
+    .letter-wrap p:first-child {
+      font-size: clamp(20px, 3vw, 28px);
+      font-weight: 700;
+      color: #fff;
+    }
+    .hl { color: var(--red); font-style: italic; }
+    .letter-closing {
+      margin-top: 50px;
+      border-top: 1px solid #222;
+      padding-top: 40px;
+    }
+    .letter-closing p {
+      font-size: clamp(18px, 2.5vw, 24px) !important;
+    }
+    .butterfly-inline { color: #5bc8f5; }
+
+    /* ═══════════ CREDITS SECTION ═══════════ */
+    #credits-section {
+      background: #050505;
+      padding: 90px 24px 100px;
+    }
+    .credits-header {
+      text-align: center;
+      margin-bottom: 70px;
+    }
+    .credits-header h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(30px, 6vw, 60px);
+      letter-spacing: 8px;
+      color: var(--gray);
+    }
+    .credits-rule {
+      width: 60px;
+      height: 3px;
+      background: var(--red);
+      margin: 16px auto 12px;
+    }
+    .credits-sub {
+      font-size: 11px;
+      letter-spacing: 4px;
+      color: #333;
+    }
+    .credits-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+    @media (max-width: 800px) {
+      .credits-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Photos */
+    .col-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      letter-spacing: 5px;
+      color: var(--gray);
+      text-align: center;
+      margin-bottom: 18px;
+    }
+    .photo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .photo-item {
+      overflow: hidden;
+      aspect-ratio: 1 / 1;
+      position: relative;
+    }
+    .photo-item.wide {
+      grid-column: span 2;
+      aspect-ratio: 16 / 9;
+    }
+    .photo-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: brightness(0.9) saturate(0.85);
+      transition: transform 0.5s ease, filter 0.4s ease;
+    }
+    .photo-item:hover img {
+      transform: scale(1.07);
+      filter: brightness(1.05) saturate(1.1);
+    }
+    .photo-label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.75));
+      padding: 20px 10px 8px;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: #ccc;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .photo-item:hover .photo-label { opacity: 1; }
+
+    /* Reviews */
+    .review-card {
+      background: #111;
+      border-left: 3px solid var(--red);
+      padding: 18px 22px;
+      margin-bottom: 14px;
+      opacity: 0;
+      transform: translateX(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .review-card.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .review-stars {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      color: var(--gold);
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .review-quote {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 15px;
+      color: #ccc;
+      line-height: 1.65;
+      margin-bottom: 8px;
+    }
+    .review-author {
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: #555;
+      text-transform: uppercase;
+    }
+
+    /* ═══════════ FINAL SCORE ═══════════ */
+    #final-score {
+      background: #000;
+      padding: 120px 24px;
+      text-align: center;
+    }
+    .score-eyebrow {
+      font-size: 10px;
+      letter-spacing: 6px;
+      color: var(--gray);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .score-big {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(90px, 22vw, 240px);
+      color: var(--red);
+      line-height: 1;
+      animation: pulsate 3s ease-in-out infinite;
+      text-shadow: 0 0 120px rgba(229,9,20,0.25);
+    }
+    @keyframes pulsate {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.82; }
+    }
+    .score-verdict {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: clamp(16px, 3vw, 28px);
+      color: #777;
+      margin-top: 16px;
+    }
+    .cert-badge {
+      display: inline-block;
+      margin-top: 36px;
+      background: var(--red);
+      color: #fff;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 14px 36px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+    }
+
+    /* ═══════════ BUTTERFLY FINALE ═══════════ */
+    #butterfly-section {
+      position: relative;
+      min-height: 60vh;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    #b-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .finale-text {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      pointer-events: none;
+    }
+    .finale-emoji {
+      font-size: clamp(50px, 10vw, 90px);
+      animation: flap 2s ease-in-out infinite alternate;
+      display: block;
+    }
+    @keyframes flap {
+      from { transform: rotate(-5deg) scale(1); }
+      to   { transform: rotate(5deg) scale(1.08); }
+    }
+    .finale-text p {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: clamp(16px, 3vw, 26px);
+      color: #e0e0e0;
+      margin-top: 18px;
+    }
+    .finale-text small {
+      display: block;
+      margin-top: 8px;
+      font-size: clamp(12px, 2vw, 16px);
+      color: #555;
+      letter-spacing: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════ 0. CLICK TO START SPLASH ═══════ -->
+  <div id="splash-screen">
+    <div id="splash-n">N</div>
+    <p id="splash-text">tap anywhere to begin</p>
+  </div>
+
+  <!-- ═══════ 1. NETFLIX VIDEO INTRO ═══════ -->
+  <div id="video-overlay" style="display:none;">
+    <video id="netflix-video" playsinline>
+      <source src="assets/netflix-intro.mp4" type="video/mp4">
+    </video>
+    <button id="skip-btn" onclick="skipIntro()">SKIP INTRO &nbsp;&#9654;</button>
+  </div>
+
+  <!-- ═══════ 2. TITLE CARD ═══════ -->
+  <section id="title-card">
+    <p class="original-badge">A NETFLIX ORIGINAL PRESENTATION</p>
+    <h1 class="big-title">SRISHA</h1>
+    <p class="title-nineteen">X&nbsp;&nbsp;I&nbsp;&nbsp;X</p>
+    <p class="title-tagline">The Story of a Girl Who Changed Everything</p>
+    <div class="meta-pills">
+      <span class="meta-pill red">2007 &ndash; PRESENT</span>
+      <span class="meta-pill">19 SEASONS</span>
+      <span class="meta-pill">UNMATCHED RUNTIME</span>
+      <span class="meta-pill red">&#8734;/5 &#9733;</span>
+    </div>
+    <p class="scroll-cue">&#9660; &nbsp; SCROLL TO PLAY &nbsp; &#9660;</p>
+  </section>
+
+  <!-- ═══════ 3. THE LETTER ═══════ -->
+  <section id="letter-section">
+    <div class="episode-banner">
+      <p class="ep-label">Season 19 &nbsp;&#183;&nbsp; Episode 1 &nbsp;&#183;&nbsp; Birthday Special</p>
+      <h2 class="ep-title">Happy Birthday, Darling</h2>
+      <p class="ep-meta">A love letter &nbsp;&#183;&nbsp; Runtime: Forever &nbsp;&#183;&nbsp; No skip button available</p>
+      <div class="progress-bar"><div class="progress-fill"></div></div>
+    </div>
+
+    <div class="letter-wrap">
+      <p>happy birthday darlinggggg</p>
+
+      <p>19????? <span class="hl">that actually sounds fake</span> because in my head you're still this tiny chaotic little thing that says the most out of pocket stuff ever and then acts innocent after &#128557;</p>
+
+      <p>but genuinelyyy happy birthdayyy my darlingggg</p>
+
+      <p>i love youuu so so so muchhh and i really hope this year is <span class="hl">soft and kind to you</span> and gives you everything you deserve &mdash; because you deserve so much more than you think.</p>
+
+      <p>and idk how, but somehow you became one of the most important parts of my life so quietly.</p>
+
+      <p>like at first it was just us sitting behind oat talking nonsense and suddenly now you're the person i think about when literally anything happens.</p>
+
+      <p>like i'll hear a romantic song and immediately think of you even if i don't understand the language &#128557;</p>
+
+      <p>or i'll see something funny and instinctively think &ldquo;nahhh srisha would laugh at this&rdquo; and then i laugh by myself like an idiot.</p>
+
+      <p>and i swear my heart does this little <span class="hl">&ldquo;!&rdquo;</span> every time i see you.</p>
+
+      <p>especially after not seeing you for a while &mdash; because then you do that thing where you squish my cheeks or pinch me and idk how to explain it but it genuinely feels comforting. <span class="hl">like i'm home again.</span></p>
+
+      <p>and omg the way you grab my neck and pull me closer to kiss your cheek. actually unfair. because my brain stops working every single time.</p>
+
+      <p>and you have no idea how cute you are when you do little things. like picking up that ladybug so gently omg &#128557; i remember seeing that and just thinking &mdash; <span class="hl">wow, she's actually so soft inside.</span></p>
+
+      <p>and your baby pics. OH MY GOD. you were the cutest darling ever &mdash; i actually wanted to eat you &#128557;&#128557;&#128557; especially that flower eating pic &mdash; i genuinely died when i saw it.</p>
+
+      <p>and okay, Pune. i never told you this properly but when i had that gut feeling something was wrong &mdash; i didn't even think. i just wanted to come to you. and i'm so glad i did. because getting to take care of you meant a lot to me. even if i was sitting there crying like some romcom character &#128557; don't expose me pls.</p>
+
+      <p>and Holi omg &#128557; i was SOOO gone but somehow the only thing keeping me alive was you and your perfume. i was literally holding onto you for dear life. sorry about that but also not really &#128524;</p>
+
+      <p>and those train rides with you. idk why but even small things feel nice with you. like waiting till your metro left or just sitting next to you doing nothing &mdash; it all means way more to me than it should.</p>
+
+      <p>and i didn't even tell you this but after your metro left i was lowkey so lost &#128557;</p>
+
+      <p>and okay &mdash; those nights where we just cuddle and sleep next to each other. <span class="hl">actually some of my favourite moments ever.</span> just lying there with you felt so peaceful and warm and safe. even though you STOLE the bedsheet &#128528; i'll forgive you because you're cute.</p>
+
+      <p>and i love the way you kiss my cheek when i get hurt &mdash; like that's your official solution to everything &#128557; or the way you hit me and then act like nothing happened. or when you make me repeat &ldquo;chi&rdquo; properly till you're satisfied &#128557; or when you squeeze my cheeks like i'm some stress toy. or when you whisper things and then laugh at my reaction. or the look before we kiss at the end of the day &mdash; omg it melts me every single time.</p>
+
+      <p>and your voice. darling, <span class="hl">your voice genuinely warms my heart.</span> like even if i'm tired or annoyed or stressed &mdash; hearing you instantly makes things feel softer.</p>
+
+      <p>and i know i joke a lot and ramble and annoy you constantly. but genuinely &mdash; i love loving you. i love caring about you. i love hearing about your day and your random thoughts and your stories and your opinions on literally anything. i even love when you bully me a little because somehow it's cute when you do it &#128557;</p>
+
+      <p>and honestly i still think about that night on the bench when i asked <span class="hl">&ldquo;srisha may i be your boyfriend&rdquo;</span> and you said yes. like what &#128557; still crazy to me.</p>
+
+      <p>and now i get to wish you happy birthday as YOUR boyfriend. which feels really special to me.</p>
+
+      <p>and idk what this next year is going to look like. but i do know that no matter what &mdash; i've got you. always. through your chaos, through your moods, through your overthinking, through your soft moments. <span class="hl">through everything.</span></p>
+
+      <p>because you matter to me so much.</p>
+
+      <p>and i really hope 19 treats you gently.</p>
+
+      <p>i hope you laugh a lot this year.<br>i hope you feel loved every single day.<br>i hope you get everything your heart wants.</p>
+
+      <p>and selfishly &mdash; i hope i get to be beside you through all of it.</p>
+
+      <p>okay i'm done now before i become TOO soft &#128557;</p>
+
+      <div class="letter-closing">
+        <p><strong>happy birthday my darling.</strong><br>thank you for existing.<br>
+        <span class="hl">i love you so so so so much <span class="butterfly-inline">&#129419;</span></span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════ 4. END CREDITS ═══════ -->
+  <section id="credits-section">
+    <div class="credits-header">
+      <h2>END CREDITS</h2>
+      <div class="credits-rule"></div>
+      <p class="credits-sub">SRISHA &mdash; SEASON FINALE &mdash; 19 YEARS IN THE MAKING</p>
+    </div>
+
+    <div class="credits-grid">
+
+      <!-- LEFT: PHOTOS -->
+      <div class="photos-col">
+        <p class="col-title">The Archive</p>
+        <div class="photo-grid">
+          <!-- Couple photo - featured wide -->
+          <div class="photo-item wide">
+            <img src="assets/photo15.jpeg" alt="Srisha and boyfriend" loading="lazy">
+            <div class="photo-label">THE LEAD ROLES</div>
+          </div>
+          <div class="photo-item">
+            <img src="assets/photo13.jpeg" alt="Baby Srisha eating flower at temple" loading="lazy">
+            <div class="photo-label">THE FLOWER SCENE</div>
+          </div>
+          <div class="photo-item">
+            <img src="assets/photo2.jpeg" alt="Baby Srisha in purple dress" loading="lazy">
+            <div class="photo-label">SEASON 1 PREMIERE</div>
+          </div>
+          <div class="photo-item">
+            <img src="assets/photo11.jpeg" alt="Toddler Srisha eating lollipop" loading="lazy">
+            <div class="photo-label">ICONIC EPISODE</div>
+          </div>
+          <div class="photo-item">
+            <img src="assets/photo7.jpeg" alt="Baby Srisha" loading="lazy">
+            <div class="photo-label">PILOT EPISODE</div>
+          </div>
+          <div class="photo-item">
+            <img src="assets/photo12.jpeg" alt="Toddler Srisha smiling in crib" loading="lazy">
+            <div class="photo-label">FAN FAVOURITE</div>
+          </div>
+          <div class="photo-item">
+            <img src="assets/photo14.jpeg" alt="Srisha at temple with flower" loading="lazy">
+            <div class="photo-label">THE SOFT ERA</div>
+          </div>
+          <div class="photo-item">
+            <img src="assets/photo1.jpeg" alt="Framed baby Srisha" loading="lazy">
+            <div class="photo-label">SEASON OPENER</div>
+          </div>
+          <div class="photo-item">
+            <img src="assets/photo9.jpeg" alt="Newborn Srisha" loading="lazy">
+            <div class="photo-label">DAY ONE</div>
+          </div>
+          <div class="photo-item">
+            <img src="assets/photo6.jpeg" alt="Young Srisha" loading="lazy">
+            <div class="photo-label">ORIGIN STORY</div>
+          </div>
+          <div class="photo-item wide">
+            <img src="assets/photo4.jpeg" alt="Baby Srisha with mother" loading="lazy">
+            <div class="photo-label">BEST SUPPORTING ROLE</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: REVIEWS -->
+      <div class="reviews-col">
+        <p class="col-title">Critical Reception</p>
+
+        <div class="review-card">
+          <div class="review-stars">5 / 5 &nbsp;&#11088;</div>
+          <p class="review-quote">&ldquo;Would love again. 10/10 would choose her every single time without hesitation. No notes. Perfect casting.&rdquo;</p>
+          <p class="review-author">&mdash; The Boyfriend, on the bench</p>
+        </div>
+
+        <div class="review-card">
+          <div class="review-stars">5 / 5 &nbsp;&#11088;</div>
+          <p class="review-quote">&ldquo;She squeezed my cheeks like a stress toy and somehow that became the highlight of my life. Peak performance.&rdquo;</p>
+          <p class="review-author">&mdash; Certified soft review, 2024</p>
+        </div>
+
+        <div class="review-card">
+          <div class="review-stars">5 / 5 &nbsp;&#11088;</div>
+          <p class="review-quote">&ldquo;Infinite rewatchability. Her laugh should be studied. Her voice should be bottled. Genuinely unfair how cute she is.&rdquo;</p>
+          <p class="review-author">&mdash; Heart, every single day</p>
+        </div>
+
+        <div class="review-card">
+          <div class="review-stars">5 / 5 &nbsp;&#11088;</div>
+          <p class="review-quote">&ldquo;Picked up a ladybug so gently at the temple. I've never recovered. Masterclass in hidden softness.&rdquo;</p>
+          <p class="review-author">&mdash; Eyewitness, the Ladybug Incident</p>
+        </div>
+
+        <div class="review-card">
+          <div class="review-stars">5 / 5 &nbsp;&#11088;</div>
+          <p class="review-quote">&ldquo;Stole the bedsheet. Still gave 5 stars. That's how extraordinary this show is. Truly a landmark piece of television.&rdquo;</p>
+          <p class="review-author">&mdash; Freezing but happy reviewer</p>
+        </div>
+
+        <div class="review-card">
+          <div class="review-stars">5 / 5 &nbsp;&#11088;</div>
+          <p class="review-quote">&ldquo;Her perfume at Holi kept me alive. That is not a metaphor. That is a medical record. 11/10 would survive again.&rdquo;</p>
+          <p class="review-author">&mdash; Holi 2024, barely surviving</p>
+        </div>
+
+        <div class="review-card">
+          <div class="review-stars">5 / 5 &nbsp;&#11088;</div>
+          <p class="review-quote">&ldquo;Said yes on the bench. Changed everything. A casting decision that will be talked about for generations.&rdquo;</p>
+          <p class="review-author">&mdash; The Bench, a landmark location</p>
+        </div>
+
+        <div class="review-card">
+          <div class="review-stars">5 / 5 &nbsp;&#11088;</div>
+          <p class="review-quote">&ldquo;Kisses cheeks as a cure for injury. Hits people and acts innocent. Somehow both are 10/10. Unprecedented range.&rdquo;</p>
+          <p class="review-author">&mdash; Confused but delighted critic</p>
+        </div>
+
+        <div class="review-card">
+          <div class="review-stars">&#8734; / 5 &nbsp;&#11088;</div>
+          <p class="review-quote">&ldquo;Certified Masterpiece. Favourite person. No further questions. No comparison possible. Just Srisha.&rdquo;</p>
+          <p class="review-author">&mdash; Final verdict, every morning</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════ 5. FINAL SCORE ═══════ -->
+  <section id="final-score">
+    <p class="score-eyebrow">Official Final Verdict</p>
+    <div class="score-big">&#8734;/5</div>
+    <p class="score-verdict">A Certified Masterpiece. Timeless. Irreplaceable. Utterly unforgettable.</p>
+    <div>
+      <span class="cert-badge">&#127813; Certified Fresh &nbsp;&#183;&nbsp; Boyfriend Approved &nbsp;&#183;&nbsp; 100% Would Repeat</span>
+    </div>
+  </section>
+
+  <!-- ═══════ 6. BUTTERFLY FINALE ═══════ -->
+  <section id="butterfly-section">
+    <canvas id="b-canvas"></canvas>
+    <div class="finale-text">
+      <span class="finale-emoji">&#129419;</span>
+      <p>happy birthday, darling srisha</p>
+      <small>i love you so so so so much</small>
+    </div>
+  </section>
+
+  <script>
+    /* ─── SPLASH → VIDEO LOGIC ─── */
+    const splash = document.getElementById('splash-screen');
+    const overlay = document.getElementById('video-overlay');
+    const vid = document.getElementById('netflix-video');
+
+    splash.addEventListener('click', () => {
+      splash.classList.add('hide');
+      setTimeout(() => {
+        splash.style.display = 'none';
+        overlay.style.display = 'flex';
+        vid.play().catch(() => {
+          // If video fails to load, skip straight to main content
+          skipIntro();
+        });
+      }, 800);
+    });
+
+    function skipIntro() {
+      overlay.classList.add('fade-out');
+      setTimeout(() => { overlay.style.display = 'none'; }, 1600);
+    }
+
+    vid.addEventListener('ended', () => setTimeout(skipIntro, 400));
+    vid.addEventListener('error', skipIntro);
+    // Safety fallback after 18s
+    setTimeout(() => {
+      if (overlay.style.display !== 'none' && !overlay.classList.contains('fade-out')) skipIntro();
+    }, 18000);
+
+    /* ─── SCROLL REVEAL FOR REVIEWS ─── */
+    const reviewCards = document.querySelectorAll('.review-card');
+    const ro = new IntersectionObserver((entries) => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add('visible'), i * 80);
+        }
+      });
+    }, { threshold: 0.15 });
+    reviewCards.forEach(c => ro.observe(c));
+
+    /* ─── PHOTO REVEAL ─── */
+    const photoItems = document.querySelectorAll('.photo-item');
+    const po = new IntersectionObserver((entries) => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          setTimeout(() => {
+            e.target.style.opacity = '1';
+            e.target.style.transform = 'scale(1)';
+          }, i * 60);
+          po.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    photoItems.forEach(p => {
+      p.style.opacity = '0';
+      p.style.transform = 'scale(0.96)';
+      p.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      po.observe(p);
+    });
+
+    /* ─── BUTTERFLY CANVAS ─── */
+    const canvas = document.getElementById('b-canvas');
+    const ctx = canvas.getContext('2d');
+    let bflies = [];
+    let animStarted = false;
+
+    function resizeCv() {
+      const sec = document.getElementById('butterfly-section');
+      canvas.width = sec.offsetWidth;
+      canvas.height = sec.offsetHeight;
+    }
+
+    class Bfly {
+      constructor(scatter) {
+        this.reset(scatter);
+      }
+      reset(scatter) {
+        this.x = Math.random() * canvas.width;
+        this.y = scatter ? Math.random() * canvas.height : canvas.height + 30;
+        this.sz = Math.random() * 22 + 18;
+        this.vx = (Math.random() - 0.5) * 1.8;
+        this.vy = -(Math.random() * 1.8 + 0.7);
+        this.wobble = Math.random() * Math.PI * 2;
+        this.ws = Math.random() * 0.04 + 0.015;
+        this.alpha = Math.random() * 0.55 + 0.35;
+      }
+      tick() {
+        this.wobble += this.ws;
+        this.x += this.vx + Math.sin(this.wobble) * 0.9;
+        this.y += this.vy;
+        if (this.y < -40) this.reset(false);
+      }
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.font = this.sz + 'px serif';
+        ctx.fillText('🦋', this.x, this.y);
+        ctx.restore();
+      }
+    }
+
+    function startButterflies() {
+      resizeCv();
+      bflies = Array.from({ length: 55 }, (_, i) => new Bfly(i < 30));
+      (function loop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        bflies.forEach(b => { b.tick(); b.draw(); });
+        requestAnimationFrame(loop);
+      })();
+    }
+
+    const bObs = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !animStarted) {
+        animStarted = true;
+        startButterflies();
+        bObs.disconnect();
+      }
+    }, { threshold: 0.2 });
+    bObs.observe(document.getElementById('butterfly-section'));
+
+    window.addEventListener('resize', () => {
+      if (animStarted) resizeCv();
+    });
+  </script>
+</body>
+</html>
